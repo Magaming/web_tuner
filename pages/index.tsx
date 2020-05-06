@@ -1,15 +1,29 @@
 import { scales } from '../consts/scales';
+import { useCallback, useEffect } from 'react';
 
 const Home = () => {
 
-  const sound = (freq: number) => {
-    const audioCtx = new AudioContext();
-    var oscillator = audioCtx.createOscillator();
+  const AudioContext = window.AudioContext;
+  const ctx = new AudioContext();
+  const oscillator = ctx.createOscillator();
+
+  const sound = useCallback((freq: number) => {
     oscillator.frequency.value = freq;
-    oscillator.connect(audioCtx.destination);
+    oscillator.connect(ctx.destination);
     oscillator.start();
     oscillator.stop(1);
-  }
+  },[])
+
+  useEffect(() => {
+    document.addEventListener('touchstart', initAudioContext);
+    function initAudioContext(){
+      document.removeEventListener('touchstart', initAudioContext);
+      // wake up AudioContext
+      const emptySource = ctx.createBufferSource();
+      emptySource.start();
+      emptySource.stop();
+    }
+  },[])
 
   return (
     <>
